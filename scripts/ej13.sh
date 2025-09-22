@@ -1,6 +1,5 @@
 #!/bin/bash
 archivo="lista.txt"
-while true; do
   echo "1) Añadir"
   echo "2) Buscar"
   echo "3) Listar"
@@ -21,4 +20,3 @@ while true; do
     6) exit ;;
     *) echo "Opcion invalida" ;;
   esac
-done
