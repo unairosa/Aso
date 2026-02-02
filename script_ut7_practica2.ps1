@@ -19,4 +19,5 @@ $aclRoot = Get-Acl "C:\Empresa"
 $aclRoot.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule("Usuarios del dominio","ReadAndExecute","ContainerInherit,ObjectInherit","None","Allow")))
 Set-Acl "C:\Empresa" $aclRoot
 
-New-SmbShare -Name "Empresa" -Path "C:\Empresa" -FullAccess "Administradores" -ReadAccess "Usuarios del dominio"
+New-SmbShare -Name "Empresa" -Path "C:\Empresa" -FullAccess "Administradores" -ChangeAccess "Usuarios del dominio"
+
