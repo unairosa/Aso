@@ -1,15 +1,17 @@
-﻿$rutaBase = "C:\Empresa_users"
+$rutaBase = "C:\Empresa_users"
 
 $usuarios = @(
-    "juanmateu","matiasgarcia","ivanperez","sergiopallares","martazornoza",
-    "ximomateu","enricgarcia","hugoperez","andreazornoza",
-    "consuelomateu","nataliagarcia","juanantonioperez","juliozornoza",
-    "carlamateu","tonigarcia","gloriamartinez","pacomolla","xarozornoza"
+    "Carla Mateu","Paco Molla","Toni Garcia","Xaro Zornoza",
+    "Gloria Martinez","Juan Mateu","Matias Garcia","Ivan Perez",
+    "Sergio Pallares","Marta Zornoza","Ximo Mateu","Enric Garcia",
+    "Hugo Perez","Andrea Zornoza","Consuelo Mateu","Natalia Garcia",
+    "Juan Antonio Perez","Julio Zornoza"
 )
 
 New-Item -ItemType Directory -Path $rutaBase -Force
 
 foreach ($u in $usuarios) {
+
     $rutaUsuario = "$rutaBase\$u"
     New-Item -ItemType Directory -Path $rutaUsuario -Force
 
@@ -17,7 +19,11 @@ foreach ($u in $usuarios) {
     $acl.SetAccessRuleProtection($true, $false)
 
     $permiso = New-Object System.Security.AccessControl.FileSystemAccessRule(
-        $u, "FullControl", "ContainerInherit,ObjectInherit", "None", "Allow"
+        "EMPRESA\$u",
+        "FullControl",
+        "ContainerInherit,ObjectInherit",
+        "None",
+        "Allow"
     )
 
     $acl.SetAccessRule($permiso)
