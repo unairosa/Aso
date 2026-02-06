@@ -6,7 +6,8 @@ $usuarios = Get-ADGroupMember -Identity $grupo -Recursive | Where-Object { $_.ob
 
 foreach ($usuario in $usuarios) {
     $nombreUsuario = $usuario.SamAccountName
-    $rutaPerfil = "\\Empresa-dc1\Empresa_users\$nombreUsuario"
+    $rutaPerfil = "\\Empresa\Empresa_users\$nombreUsuario"
     Set-ADUser -Identity $nombreUsuario -ProfilePath $rutaPerfil
     Write-Host "Perfil asignado a $nombreUsuario en $rutaPerfil"
 }
+
