@@ -1,15 +1,23 @@
-﻿﻿$departamentos = Import-Csv "C:\Users\Administrador\Downloads\archivos\departamentos.csv" -Delimiter ";"
+$departamentos = Import-Csv "C:\Users\Administrador\Downloads\archivos\departamentos.csv" -Delimiter ";"
 $empleados = Import-Csv "C:\Users\Administrador\Downloads\archivos\empleados.csv" -Delimiter ";"
 
-New-ADOrganizationalUnit -Name "Empresa" -Path "DC=empresa,DC=local" -ErrorAction SilentlyContinue
+New-ADOrganizationalUnit -Name "Empresa" -Path "DC=empresa,DC=local"
 
 foreach ($dep in $departamentos) {
-    New-ADOrganizationalUnit -Name $dep.Departamento -Path "OU=Empresa,DC=empresa,DC=local" -ErrorAction SilentlyContinue
-    New-ADGroup -Name "$($dep.Departamento)" -GroupScope Global -Path "OU=$($dep.Departamento),OU=Empresa,DC=empresa,DC=local" -ErrorAction SilentlyContinue
+    New-ADOrganizationalUnit -Name $dep.Departamento -Path "OU=Empresa,DC=empresa,DC=local"
+    New-ADGroup -Name $dep.Departamento -GroupScope Global -Path "OU=$($dep.Departamento),OU=Empresa,DC=empresa,DC=local"
 }
 
 foreach ($emp in $empleados) {
-    $usu = "$($emp.Nombre.ToLower()).$($emp.Apellido.ToLower())"
-    New-ADUser -Name "$($emp.Nombre) $($emp.Apellido)" -SamAccountName $usu -UserPrincipalName "$usu@empresa.local" -Path "OU=$($emp.Departamento),OU=Empresa,DC=empresa,DC=local" -AccountPassword (ConvertTo-SecureString "aso2025." -AsPlainText -Force) -Enabled $true -ChangePasswordAtLogon $true -ErrorAction SilentlyContinue
-    Add-ADGroupMember -Identity "$($emp.Departamento)" -Members $usu -ErrorAction SilentlyContinue
+    $usuario = "$($emp.Nombre.ToLower()).$($emp.Apellido.ToLower())"
+    New-ADUser `
+        -Name "$($emp.Nombre) $($emp.Apellido)" `
+        -SamAccountName $usuario `
+        -UserPrincipalName "$usuario@empresa.local" `
+        -Path "OU=$($emp.Departamento),OU=Empresa,DC=empresa,DC=local" `
+        -AccountPassword (ConvertTo-SecureString "aso2025." -AsPlainText -Force) `
+        -Enabled $true `
+        -ChangePasswordAtLogon $true
+
+    Add-ADGroupMember -Identity $emp.Departamento -Members $usuario
 }
