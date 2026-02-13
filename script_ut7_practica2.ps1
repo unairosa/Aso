@@ -1,23 +1,24 @@
-﻿$deps = Import-Csv "C:\Users\Administrador\Downloads\archivos\departamentos.csv" -Delimiter ";"
+﻿New-Item -Path "C:\Empresa" -ItemType Directory -Force
 
-New-Item "C:\Empresa" -ItemType Directory -ErrorAction SilentlyContinue
+$datos = Import-Csv "C:\departamentos.csv" -Delimiter ";"
 
-foreach ($d in $deps) {
-    New-Item "C:\Empresa\$($d.Departamento)" -ItemType Directory -ErrorAction SilentlyContinue
+foreach ($linea in $datos) {
+    $ruta = "C:\Empresa\" + $linea.departamento
+    New-Item -Path $ruta -ItemType Directory -Force
 
-    $acl = Get-Acl "C:\Empresa\$($d.Departamento)"
-    $acl.SetAccessRuleProtection($true,$false)
+    $acl = Get-Acl $ruta
+    $acl.SetAccessRuleProtection($true, $false)
 
-    $acl.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule("$($d.Departamento)","Modify","ContainerInherit,ObjectInherit","None","Allow")))
-    $acl.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule("Administradores","FullControl","ContainerInherit,ObjectInherit","None","Allow")))
-    $acl.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule("Usuarios del dominio","ReadAndExecute","ContainerInherit,ObjectInherit","None","Allow")))
+    $p1 = New-Object System.Security.AccessControl.FileSystemAccessRule("Administradores", "FullControl", "ContainerInherit, ObjectInherit", "None", "Allow")
+    $acl.AddAccessRule($p1)
 
-    Set-Acl "C:\Empresa\$($d.Departamento)" $acl
+    $p2 = New-Object System.Security.AccessControl.FileSystemAccessRule($linea.departamento, "Modify", "ContainerInherit, ObjectInherit", "None", "Allow")
+    $acl.AddAccessRule($p2)
+
+    $p3 = New-Object System.Security.AccessControl.FileSystemAccessRule("Usuarios del dominio", "ReadAndExecute", "ContainerInherit, ObjectInherit", "None", "Allow")
+    $acl.AddAccessRule($p3)
+
+    Set-Acl $ruta $acl
 }
 
-$aclRoot = Get-Acl "C:\Empresa"
-$aclRoot.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule("Usuarios del dominio","ReadAndExecute","ContainerInherit,ObjectInherit","None","Allow")))
-Set-Acl "C:\Empresa" $aclRoot
-
-New-SmbShare -Name "Empresa" -Path "C:\Empresa" -FullAccess "Administradores" -ChangeAccess "Usuarios del dominio"
-
+New-SmbShare -Name "Empresa" -Path "C:\Empresa" -FullAccess "Usuarios del dominio"
