@@ -1,27 +1,25 @@
-Import-Module ActiveDirectory
+New-Item -Path C:\Empresa_users -ItemType Directory
 
-$rutaBase = "C:\Empresa_users"
-New-Item -ItemType Directory -Path $rutaBase -Force
+$usuarios = Import-Csv 'C:\archivos\empleados.csv' -Delimiter ";"
 
-$usuarios = Get-ADUser -Filter * -SearchBase "OU=Empresa,DC=EMPRESA,DC=LOCAL"
+foreach($usu in $usuarios){
+    $login = "$($usu.nombre).$($usu.apellido)".ToLower()
+    New-Item -Path "C:\Empresa_users\$login" -ItemType Directory
 
-foreach ($u in $usuarios) {
-    $rutaUsuario = Join-Path $rutaBase $u.SamAccountName
-    New-Item -ItemType Directory -Path $rutaUsuario -Force
+    $acl = Get-Acl $ruta
+    $acl.SetAccessRuleProtection($true,$false)
 
-    $acl = Get-Acl $rutaUsuario
-    $acl.SetAccessRuleProtection($true, $false)
+    $acl.SetAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule("Administradores","FullControl","ContainerInherit,ObjectInherit","None","Allow")))
+    $acl.AddAccessRule((New-Object System.Security.AccessControl.FileSystemAccessRule($login,"FullControl","ContainerInherit,ObjectInherit","None","Allow")))
 
-    $permiso = New-Object System.Security.AccessControl.FileSystemAccessRule(
-        $u.SamAccountName,
-        "FullControl",
-        "ContainerInherit,ObjectInherit",
-        "None",
-        "Allow"
-    )
+    Set-Acl $ruta $acl
 
-    $acl.SetAccessRule($permiso)
-    Set-Acl $rutaUsuario $acl
+    Set-ADUser -Identity $login `
+        -ScriptPath "carpetas.bat" `
+        -HomeDrive "Z:" `
+        -HomeDirectory "\\EMPRESA-DC1\Empresa_users$\$login"
 }
 
-New-SmbShare -Name "Empresa_users$" -Path $rutaBase -FullAccess "Administradores"
+New-SmbShare -Name Empresa_users$ -Path C:\Empresa_users -ChangeAccess "Usuarios del dominio" -FullAccess "Administradores"
+
+
