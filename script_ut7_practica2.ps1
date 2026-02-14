@@ -3,8 +3,7 @@
 $datos = Import-Csv "C:\departamentos.csv" -Delimiter ";"
 
 foreach ($linea in $datos) {
-    $ruta = "C:\Empresa\" + $linea.departamento
-    New-Item -Path $ruta -ItemType Directory -Force
+    New-Item -Path "C:\Empresa\$linea.departamento" -ItemType Directory
 
     $acl = Get-Acl $ruta
     $acl.SetAccessRuleProtection($true, $false)
@@ -17,4 +16,5 @@ foreach ($linea in $datos) {
 }
 
 New-SmbShare -Name "Empresa" -Path "C:\Empresa" -FullAccess "Usuarios del dominio"
+
 
